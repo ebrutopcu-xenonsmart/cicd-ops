@@ -1,0 +1,22 @@
+{
+  "name": "cicd-ops",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ebrutopcu-xenonsmart/cicd-ops.git"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ebrutopcu-xenonsmart/cicd-ops/issues"
+  },
+  "homepage": "https://github.com/ebrutopcu-xenonsmart/cicd-ops#readme"
+}
