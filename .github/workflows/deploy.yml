@@ -1,39 +1,38 @@
 name: Build and Push to Artifact Registry
 
 on:
-push:
-branches:
-  - main
+  push:
+    branches:
+      - main
 
 permissions:
-id-token: write
-contents: read
+  id-token: write
+  contents: read
 
 jobs:
-build:
-runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest
 
-steps:
-  - name: Checkout
-    uses: actions/checkout@v4
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-  - name: Authenticate to Google Cloud
-    uses: google-github-actions/auth@v2
-    with:
-      workload_identity_provider: "projects/951751426898/locations/global/workloadIdentityPools/github-actions-pool-my/providers/github-provider"
-      service_account: "github-pusher@meta-wording-487206-k0.iam.gserviceaccount.com"
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/951751426898/locations/global/workloadIdentityPools/github-actions-pool-my/providers/github-provider
+          service_account: github-pusher@meta-wording-487206-k0.iam.gserviceaccount.com
 
-  - name: Set up gcloud
-    uses: google-github-actions/setup-gcloud@v2
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
 
-  - name: Configure Docker
-    run: gcloud auth configure-docker eu-west3-docker.pkg.dev
+      - name: Configure Docker
+        run: gcloud auth configure-docker eu-west3-docker.pkg.dev --quiet
 
-  - name: Build Docker image
-    run: |
-      docker build -t eu-west3-docker.pkg.dev/meta-wording-487206-k0/arti-repo/my-app:latest .
+      - name: Build Docker image
+        run: |
+          docker build -t eu-west3-docker.pkg.dev/meta-wording-487206-k0/arti-repo/my-app:latest .
 
-  - name: Push Docker image
-    run: |
-      docker push eu-west3-docker.pkg.dev/meta-wording-487206-k0/arti-repo/my-app:latest
-
+      - name: Push Docker image
+        run: |
+          docker push eu-west3-docker.pkg.dev/meta-wording-487206-k0/arti-repo/my-app:latest
