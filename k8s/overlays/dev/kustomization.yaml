@@ -1,0 +1,13 @@
+namespace: my-app-dev
+
+resources:
+  - ../../base
+  - namespace.yaml
+
+images:
+  - name: europe-west3-docker.pkg.dev/meta-wording-487206-k0/arti-repo/my-app
+    newTag: v1.0.0-dev
+
+replicas:
+  - name: my-app
+    count: 1
