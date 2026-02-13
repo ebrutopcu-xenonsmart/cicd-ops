@@ -7,8 +7,7 @@ on:
 
 permissions:
   id-token: write
-  contents: read
-  contents: write   # kustomization tag güncellemesi için push
+  contents: write   # read + push (kustomization tag güncellemesi için)
 
 jobs:
   build-and-push:
