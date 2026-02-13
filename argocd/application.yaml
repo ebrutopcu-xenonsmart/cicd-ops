@@ -1,0 +1,25 @@
+# Argo CD Application - GitOps ile GKE'ye otomatik deploy
+# Kurulum: kubectl apply -f argocd/application.yaml (Argo CD yüklü namespace'te)
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cicd-ops-dev
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/ebrutopcu-xenonsmart/cicd-ops.git
+    targetRevision: main
+    path: k8s/overlays/dev
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: my-app-dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - PruneLast=true

@@ -1,4 +1,4 @@
-name: Build and Push to Artifact Registry
+name: Build, Push and Deploy (Argo CD)
 
 on:
   push:
@@ -8,14 +8,21 @@ on:
 permissions:
   id-token: write
   contents: read
+  contents: write   # kustomization tag güncellemesi için push
 
 jobs:
-  build:
+  build-and-push:
     runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.meta.outputs.short_sha }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Short SHA
+        id: meta
+        run: echo "short_sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
@@ -31,8 +38,31 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t europe-west3-docker.pkg.dev/meta-wording-487206-k0/arti-repo/my-app:latest .
+          IMAGE=europe-west3-docker.pkg.dev/meta-wording-487206-k0/arti-repo/my-app
+          docker build -t $IMAGE:${{ steps.meta.outputs.short_sha }} -t $IMAGE:latest .
 
       - name: Push Docker image
         run: |
-          docker push europe-west3-docker.pkg.dev/meta-wording-487206-k0/arti-repo/my-app:latest
+          IMAGE=europe-west3-docker.pkg.dev/meta-wording-487206-k0/arti-repo/my-app
+          docker push $IMAGE:${{ steps.meta.outputs.short_sha }}
+          docker push $IMAGE:latest
+
+  update-gitops:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Update Kustomize image tag
+        run: |
+          TAG="${{ needs.build-and-push.outputs.image_tag }}"
+          sed -i "s/newTag:.*/newTag: $TAG/" k8s/overlays/dev/kustomization.yaml
+          cat k8s/overlays/dev/kustomization.yaml
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add k8s/overlays/dev/kustomization.yaml
+          git diff --staged --quiet || (git commit -m "chore: deploy image ${{ needs.build-and-push.outputs.image_tag }} [skip ci]" && git push)
