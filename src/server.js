@@ -17,7 +17,7 @@ const server = http.createServer((req, res) => {
     }));
 });
 
-console.log(`Starting server version ${VERSION}`);
+console.log(`Starting server version ${VERSION} ....`);
 
 server.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}, version ${VERSION}`);
